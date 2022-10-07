@@ -2,10 +2,10 @@ server = global.server;
 create = global.create;
 
 server.app.get('/', (req, res) => {
-    res.send('World of Cars API service.')
+    res.send('Pixie Hollow API service.')
 })
 
-server.app.get('/carsds/api/WhoAmIRequest', async (req, res) => {
+server.app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
     const ses = req.session;
 
     var success = false;
@@ -79,15 +79,15 @@ server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
     res.send(xml);
 })
 
-server.app.post('/carsds/api/AccountLoginRequest', async (req, res) => {
+server.app.post('/fairies/api/AccountLoginRequest', async (req, res) => {
    await db.handleAccountLogin(req, res);
 })
 
-server.app.get('/carsds/api/AccountLoginRequest', async (req, res) => {
+server.app.get('/fairies/api/AccountLoginRequest', async (req, res) => {
     await db.handleAccountLogin(req, res);
 })
 
-server.app.get('/carsds/api/GameEntranceRequest', (req, res) => {
+server.app.get('/fairies/api/GameEntranceRequest', (req, res) => {
     const root = create().ele('GameEntranceRequestResponse');
     const item = root.ele('success');
     item.txt('true');
@@ -100,7 +100,7 @@ server.app.get('/carsds/api/GameEntranceRequest', (req, res) => {
     res.send(xml);
 })
 
-server.app.get('/carsds/api/GenerateTokenRequest', (req, res) => {
+server.app.post('/fairies/api/GenerateTokenRequest', (req, res) => {
     const root = create().ele('GenerateTokenRequestResponse');
 
     const ses = req.session;

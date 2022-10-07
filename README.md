@@ -1,2 +1,2 @@
-# woc-api
-AMF & website API service for World of Cars.
+# ph-api
+AMF & website API service for Pixie Hollow.

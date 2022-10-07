@@ -1,7 +1,7 @@
 {
-  "name": "amf-service",
+  "name": "ph-api",
   "version": "1.0.0",
-  "description": "Web API for The World of Cars Online.",
+  "description": "AMF & website API service for Pixie Hollow.",
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

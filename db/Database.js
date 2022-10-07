@@ -10,7 +10,7 @@ const saltRounds = 12;
 
 class Database {
     constructor() {
-        mongoose.connect('mongodb://127.0.0.1:27017/woc');
+        mongoose.connect('mongodb://127.0.0.1:27017/PixieHollow');
 
         console.log('Connected to MongoDB!');
 
