@@ -18,7 +18,7 @@ server.app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
     const root = create().ele('WhoAmIResponse');
 
     const item = root.ele('success');
-    item.txt(success);
+    item.txt(true);
 
     const status = root.ele('status');
     const user = root.ele('username');
@@ -36,12 +36,17 @@ server.app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
     account.ele('first_name');
     account.ele('dname');
     account.ele('age').txt(0);
+    account.ele('isChild').txt(true);
+    account.ele('access').txt('basic');
     account.ele('touAccepted').txt('basic');
-    account.ele('access').txt('true');
     account.ele('speed_chat_prompt').txt('false');
 
     root.ele('userTestAccessAllowed').txt('false');
-    root.ele('testUser').txt('false');
+
+    serverTime = root.ele('server-time');
+    serverTime.ele('day').txt(new Date().toLocaleDateString('en-ZA'));
+    serverTime.ele('time').txt('0:0');
+    serverTime.ele('day-of-week').txt(new Date().toLocaleDateString('en-US', {weekday: 'short'}));
 
     const xml = root.end({prettyPrint: true});
     res.send(xml);
