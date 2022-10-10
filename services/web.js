@@ -5,7 +5,15 @@ server.app.get('/', (req, res) => {
     res.send('Pixie Hollow API service.')
 })
 
+server.app.get('/fairies/api/WhoAmIRequest', async (req, res) => {
+    handleWhoAmI(req, res);
+})
+
 server.app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
+    handleWhoAmI(req, res);
+})
+
+function handleWhoAmI(req, res) {
     const ses = req.session;
 
     var success = false;
@@ -50,7 +58,7 @@ server.app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
 
     const xml = root.end({prettyPrint: true});
     res.send(xml);
-})
+}
 
 server.app.get('/dxd/flashAPI/login', async (req, res) => {
     await db.handleFlashLogin(req, res);
