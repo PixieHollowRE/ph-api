@@ -32,7 +32,7 @@ function handleWhoAmI(req, res) {
     const user = root.ele('username');
 
     if (ses.logged && ses.username && ses.userId) {
-        status.txt('logged_in_player');
+        status.txt('logged_in_fairy');
         user.txt(ses.username);
 
         accountId = ses.userId;
@@ -42,12 +42,14 @@ function handleWhoAmI(req, res) {
 
     account = root.ele('account', {'account_id': accountId})
     account.ele('first_name');
-    account.ele('dname');
+    account.ele('dname').txt('test');
     account.ele('age').txt(0);
     account.ele('isChild').txt(true);
     account.ele('access').txt('basic');
     account.ele('touAccepted').txt('basic');
     account.ele('speed_chat_prompt').txt('false');
+    account.ele('dname_submitted').txt(true);
+    account.ele('dname_approved').txt(true);
 
     root.ele('userTestAccessAllowed').txt('false');
 
@@ -125,6 +127,26 @@ server.app.post('/fairies/api/GenerateTokenRequest', (req, res) => {
         const token = root.ele('token')
         token.txt(ses.username);
     }
+
+    const xml = root.end({prettyPrint: true});
+    res.send(xml);
+})
+
+server.app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
+    const root = create().ele('SubmitDNameRequestResponse');
+
+    const item = root.ele('success');
+    item.txt('true');
+
+    const xml = root.end({prettyPrint: true});
+    res.send(xml);
+})
+
+server.app.post('/fairies/api/FairiesProfileRequest', (req, res) => {
+    const root = create().ele('FairiesProfileRequestResponse');
+
+    const item = root.ele('success');
+    item.txt('true');
 
     const xml = root.end({prettyPrint: true});
     res.send(xml);
