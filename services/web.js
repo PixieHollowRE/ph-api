@@ -151,3 +151,25 @@ server.app.post('/fairies/api/FairiesProfileRequest', (req, res) => {
     const xml = root.end({prettyPrint: true});
     res.send(xml);
 })
+
+server.app.post('/fairies/api/FairiesNewFairyRequest', (req, res) => {
+    const root = create().ele('response');
+
+    const item = root.ele('success');
+    item.txt('true');
+
+    root.ele('fairy_id').txt(1);
+
+    const xml = root.end({prettyPrint: true});
+    res.send(xml);
+})
+
+server.app.post('/fairies/api/ChooseFairyRequest', (req, res) => {
+    const root = create().ele('response');
+
+    const item = root.ele('success');
+    item.txt('true');
+
+    const xml = root.end({prettyPrint: true});
+    res.send(xml);
+})
