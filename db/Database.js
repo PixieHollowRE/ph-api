@@ -2,7 +2,7 @@ mongoose = global.mongoose;
 create = global.create;
 
 var Account = require('./models/Account');
-var Cars = require('./models/Cars');
+var Fairies = require('./models/Fairies');
 
 const bcrypt = require('bcrypt');
 
@@ -99,31 +99,21 @@ class Database {
        return true;
     }
 
-    async doesCarExist(accountId) {
-        var car = await Cars.findOne({_id: accountId});
+    async doesFairyExist(accountId) {
+        var fairy = await Fairies.findOne({_id: accountId});
 
-        if (car) {
+        if (fairy) {
             return true;
         }
 
         return false;
     }
 
-    async retrieveCar(accountId) {
-        var car = await Cars.findOne({_id: accountId});
+    async retrieveFairy(fairyId) {
+        var fairy = await Fairies.findOne({_id: fairyId});
 
-        if (car) {
-            return car;
-        }
-
-        return false;
-    }
-
-    async retrieveCarData(accountId) {
-        var car = await this.retrieveCar(accountId);
-
-        if (car) {
-            return car.serializedData;
+        if (fairy) {
+            return fairy;
         }
 
         return false;
@@ -155,26 +145,19 @@ class Database {
         return bcrypt.compareSync(password, account.password);
     }
 
-    async createCar(accountId) {
-        const playerId = await Cars.countDocuments({}) + 1;
+    async createFairy(accountId, fairyData) {
+        const fairyId = await Fairies.countDocuments({}) + 1;
 
-        car = new Racecar();
+        // Store our fairy.
+        var fairy = new Fairies({
+            _id: fairyId,
+            ownerId: accountId,
+            data: fairyData
+        });
 
-        car.userId = accountId;
-        car.playerId = playerId;
-        car.racecarId = playerId; // TODO: Is this okay?
+        await fairy.save();
 
-        var serialized = libamf.serialize(car, libamf.ENCODING.AMF3);
-
-        // Store out car.
-        var car = new Cars({
-            _id: accountId,
-            serializedData: serialized
-        })
-
-        await car.save();
-
-        return true;
+        return fairyId;
     }
 
     async createAccount(username, password) {

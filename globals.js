@@ -89,6 +89,9 @@ server.app.use(express.urlencoded({extended: true}));
 
 server.app.use(cors());
 
+var xmlparser = require('express-xml-bodyparser');
+server.app.use(xmlparser());
+
 // Setup sessions and include our web routes.
 var crypto = require('crypto');
 var session = require('express-session');

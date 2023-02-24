@@ -46,7 +46,7 @@ function handleWhoAmI(req, res) {
     account.ele('age').txt(0);
     account.ele('isChild').txt(true);
     account.ele('access').txt('basic');
-    account.ele('touAccepted').txt('basic');
+    account.ele('touAccepted').txt(true);
     account.ele('speed_chat_prompt').txt('false');
     account.ele('dname_submitted').txt(true);
     account.ele('dname_approved').txt(true);
@@ -142,23 +142,53 @@ server.app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
     res.send(xml);
 })
 
-server.app.post('/fairies/api/FairiesProfileRequest', (req, res) => {
-    const root = create().ele('FairiesProfileRequestResponse');
+server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
+    const root = create().ele('response');
+
+    const ses = req.session;
 
     const item = root.ele('success');
-    item.txt('true');
+    item.txt(ses ? 'true' : 'false');
+
+    fairies = root.ele('fairies');
+
+    const fairy = fairies.ele('fairy');
+
+    fairy.ele('chosen').txt(true);
+
+    const avatar = fairy.ele('avatar');
+
+    console.log(req.body);
+
+    if (req.body.current != '###') {
+        ses.fairyId = req.body.current;
+    }
+
+    fairy.ele('fairy_id').txt(ses.fairyId);
+
+    const fairyData = await db.retrieveFairy(ses.fairyId);
+    console.log(fairyData);
+
+    root.ele('user_id').txt(ses.userId);
 
     const xml = root.end({prettyPrint: true});
     res.send(xml);
 })
 
-server.app.post('/fairies/api/FairiesNewFairyRequest', (req, res) => {
+server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {;
+    const fairyData = req.body.fairiesnewfairyrequest.fairy[0];
+
     const root = create().ele('response');
 
-    const item = root.ele('success');
-    item.txt('true');
+    const ses = req.session;
 
-    root.ele('fairy_id').txt(1);
+    const item = root.ele('success');
+    item.txt(ses ? 'true' : 'false');
+
+    const fairy_id = await db.createFairy(ses.userId, fairyData) ? ses : -1;
+    console.log(fairy_id);
+
+    root.ele('fairy_id').txt(fairy_id);
 
     const xml = root.end({prettyPrint: true});
     res.send(xml);
