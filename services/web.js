@@ -177,7 +177,6 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
 
 server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
     ;
-    console.log(req.body);
     const fairyData = req.body.fairiesnewfairyrequest.fairy[0];
 
     const root = create().ele('response');

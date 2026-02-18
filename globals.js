@@ -102,7 +102,7 @@ const MongoStore = require('connect-mongo').default
 
 sess = {
     secret: process.env.SESSION_SECRET || 'ph_secret',
-    store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/ph' }),
+    store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/PixieHollow' }),
     resave: false,
     saveUninitialized: true,
 
