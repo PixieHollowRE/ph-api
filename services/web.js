@@ -362,8 +362,6 @@ server.app.get('/fairies/api/internal/retrieveAccount', async (req, res) => {
     return res.status(401).send('Authorization failed.')
   }
 
-  console.log(req.query)
-
   res.setHeader('content-type', 'application/json')
   if (req.query.userName) {
     let account = await db.retrieveAccountFromUser(req.query.userName)
@@ -464,10 +462,8 @@ server.app.post('/fairies/api/internal/updateObject/:identifier', async (req, re
     if (!updated) {
       const fairy = await db.retrieveFairy(req.params.identifier)
       if (fairy) {
-        const fairyData = fairy.toObject()
-        Object.assign(fairyData, data)
-        fairy = fairyData
-        await fairyData.save()
+        Object.assign(fairy, data)
+        await fairy.save()
         updated = true
       }
     }
