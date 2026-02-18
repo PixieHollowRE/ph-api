@@ -85,29 +85,21 @@ server.registerService(raceCarService);
 server.registerService(playerService);
 
 // for parsing application/x-www-form-urlencoded
-server.app.use(express.urlencoded({extended: true}));
+server.app.use(express.urlencoded({ extended: true }))
 
-server.app.use(cors());
+server.app.use(cors())
 
-var xmlparser = require('express-xml-bodyparser');
-server.app.use(xmlparser());
+server.app.set('trust proxy', 1)
 
 // Setup sessions and include our web routes.
-var crypto = require('crypto');
-var session = require('express-session');
+const session = require('express-session')
+const MongoStore = require('connect-mongo').default
 
-const redis = require('redis');
-const redisStore = require('connect-redis')(session);
-
-const redisClient = redis.createClient({
-    legacyMode: true
-});
-
-redisClient.connect();
+/* global sess: writeable */
 
 sess = {
-    secret: crypto.randomBytes(32).toString('base64'),
-    store: new redisStore({client: redisClient}),
+    secret: process.env.SESSION_SECRET || 'ph_secret',
+    store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/ph' }),
     resave: false,
     saveUninitialized: true,
 
@@ -115,9 +107,10 @@ sess = {
         secure: false, // if true only transmit cookie over https
         httpOnly: false, // if true prevent client side JS from reading the cookie
         maxAge: 1000 * 60 * 10 // session max age in miliseconds
-    }
+    },
+    rolling: true // reset the cookie Max-Age on every request
 }
 
-server.app.use(session(sess));
+server.app.use(session(sess))
 
 require('./services/web');
