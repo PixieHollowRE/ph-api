@@ -1,16 +1,13 @@
 /* global mongoose: writeable */
 /* global create: writeable */
 /* global libamf: writeable */
-/* global Racecar: writeable */
 
 mongoose = global.mongoose
 create = global.create
 libamf = global.libamf
-Racecar = global.Racecar
 
 const Account = require('./models/Account')
-const Cars = require('./models/Fairy')
-const RedeemableCodes = require('./models/RedeemableCodes')
+const Fairy = require('./models/Fairy')
 
 const bcrypt = require('bcrypt')
 
@@ -26,7 +23,7 @@ class Database {
   }
 
   async connect () {
-    await mongoose.connect('mongodb://127.0.0.1:27017/woc')
+    await mongoose.connect('mongodb://127.0.0.1:27017/PixieHollow')
 
     console.log('Connected to MongoDB!')
 
@@ -167,41 +164,41 @@ class Database {
     return true
   }
 
-  async doesCarExist (identifier) {
-    const car = await Cars.findOne({ $or: [{ _id: identifier }, { accountId: identifier }] })
+  async doesFairyExist (identifier) {
+    const fairy = await Fairy.findOne({ $or: [{ _id: identifier }, { accountId: identifier }] })
 
-    if (car) {
+    if (fairy) {
       return true
     }
 
     return false
   }
 
-  async retrieveCar (identifier) {
-    const car = await Cars.findOne({ $or: [{ _id: identifier }, { accountId: identifier }] })
+  async retrieveFairy (identifier) {
+    const fairy = await Fairy.findOne({ $or: [{ _id: identifier }, { accountId: identifier }] })
 
-    if (car) {
-      return car
+    if (fairy) {
+      return fairy
     }
 
     return false
   }
 
-  async retrieveCarByOwnerAccount (owner) {
-    const car = await Cars.findOne({ ownerAccount: owner })
+  async retrieveFairyByOwnerAccount (owner) {
+    const fairy = await Fairy.findOne({ ownerAccount: owner })
 
-    if (car) {
-      return car
+    if (fairy) {
+      return fairy
     }
 
     return false
   }
 
-  async retrieveCarData (identifier) {
-    const car = await this.retrieveCar(identifier)
+  async retrieveFairyData (identifier) {
+    const fairy = await this.retrieveFairy(identifier)
 
-    if (car) {
-      return car.carData
+    if (fairy) {
+      return fairy.fairyData
     }
 
     return false
@@ -275,7 +272,7 @@ class Database {
     return await Account.findOne({ username })
   }
 
-  async retrieveAccountFromCarId (fairyId) {
+  async retrieveAccountFromFairyId (fairyId) {
     return await Account.findOne({ $or: [{ playerId: fairyId }] })
   }
 
@@ -315,32 +312,59 @@ class Database {
     return match
   }
 
-  async createCar (accountId) {
-    const account = await this.retrieveAccountFromIdentifier(accountId)
-    const carObj = new Racecar()
+  async createFairy (accountId, fairyData) {
+    const avatar = fairyData.avatar[0]
 
-    const serialized = libamf.serialize(carObj, libamf.ENCODING.AMF3)
-    const data = libamf.deserialize(serialized, libamf.ENCODING.AMF3)
-
-    // Store our car.
-    const car = new Cars({
-      _id: await this.getNextDoId(),
-      carData: data,
-      ownerAccount: await this.getUserNameFromAccountId(accountId),
-      accountId
+    const proportions = {}
+    avatar.proportion.forEach(p => {
+      proportions[p.$.type.toLowerCase()] = parseInt(p._)
     })
 
-    // AMF data
-    car.carData.userId = accountId
-    car.carData.playerId = car._id
+    const rotations = {}
+    avatar.rotation.forEach(r => {
+      rotations[r.$.type.toLowerCase()] = parseInt(r._)
+    })
 
-    const saved = await car.save()
+    const items = avatar.item.map(i => ({
+      type: i.$.type,
+      item_id: parseInt(i.item_id[0]),
+      color_number: parseInt(i.color[0].$.number),
+      color_value: parseInt(i.color[0]._)
+    }))
+
+    const account = await this.retrieveAccountFromIdentifier(accountId)
+
+    // Store our fairy.
+    const fairy = new Fairy({
+      _id: await this.getNextDoId(),
+      ownerAccount: await this.getUserNameFromAccountId(accountId),
+      accountId,
+      name: fairyData.name[0],
+      talent: parseInt(fairyData.talent[0]),
+      gender: parseInt(fairyData.gender[0]),
+      avatar: {
+        proportions,
+        rotations,
+        hair_back: parseInt(avatar.hair_back[0]),
+        hair_front: parseInt(avatar.hair_front[0]),
+        face: parseInt(avatar.face[0]),
+        eye: parseInt(avatar.eye[0]),
+        wing: parseInt(avatar.wing[0]),
+        hair_color: parseInt(avatar.hair_color[0]),
+        eye_color: parseInt(avatar.eye_color[0]),
+        skin_color: parseInt(avatar.skin_color[0]),
+        wing_color: parseInt(avatar.wing_color[0]),
+        items
+      }
+    })
+
+    const saved = await fairy.save()
 
     // Save the information into the account.
-    account.playerId = car._id
+    account.playerId = fairy._id
     await account.save()
 
-    return saved.carData
+    return saved._id
   }
 
   async createAccount (username, password) {
@@ -358,31 +382,6 @@ class Database {
     })
 
     return await account.save()
-  }
-
-  async checkCodeRedeemedByUser (username, code) {
-    const account = await this.retrieveAccountFromUser(username)
-
-    if (account) {
-      if (account.codesRedeemed === undefined) {
-        // Add code redemption array to Account object
-        account.codesRedeemed = {}
-        await account.save()
-      }
-
-      return account.codesRedeemed.includes(code)
-    }
-
-    return false
-  }
-
-  async setCodeAsRedeemedByUser (username, code) {
-    const account = await this.retrieveAccountFromUser(username)
-
-    if (account) {
-      account.codesRedeemed.push(code)
-      await account.save()
-    }
   }
 }
 

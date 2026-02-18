@@ -21,6 +21,7 @@
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
+    "express-xml-bodyparser": "^0.4.1",
     "fast-xml-parser": "^5.3.6",
     "globals": "^17.3.0",
     "libamf": "^1.4.2",

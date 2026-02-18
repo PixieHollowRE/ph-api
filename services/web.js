@@ -12,7 +12,7 @@ const { shopData } = require('../constants')
 const loginQueue = []
 
 server.app.get('/', (req, res) => {
-  res.send('World of Cars API service.')
+  res.send('Pixie Hollow API service.')
 })
 
 function verifyAuthorization (token) {
@@ -73,13 +73,13 @@ async function handleWhoAmIRequest (req, res) {
   const root = create().ele('WhoAmIResponse')
 
   const item = root.ele('success')
-  item.txt(success)
+  item.txt(true)
 
   const status = root.ele('status')
   const user = root.ele('username')
 
   if (ses.logged && ses.username && ses.userId) {
-    status.txt('logged_in_player')
+    status.txt('logged_in_fairy')
     user.txt(ses.username)
 
     accountId = ses.userId
@@ -95,23 +95,26 @@ async function handleWhoAmIRequest (req, res) {
   account.ele('first_name')
   account.ele('dname').txt(userName)
   account.ele('age').txt(0)
-  account.ele('touAccepted').txt('basic')
-  account.ele('access').txt('true')
+  account.ele('isChild').txt(true)
+  account.ele('access').txt('basic')
+  account.ele('touAccepted').txt(true)
   account.ele('speed_chat_prompt').txt(speedChatPrompt)
+  account.ele('dname_submitted').txt(true)
+  account.ele('dname_approved').txt(true)
 
   root.ele('userTestAccessAllowed').txt('false')
-  root.ele('testUser').txt('false')
 
-  if (ses.puppetId) {
-    root.ele('puppet_id').txt(ses.puppetId)
-  }
+  serverTime = root.ele('server-time')
+  serverTime.ele('day').txt(new Date().toLocaleDateString('en-ZA'))
+  serverTime.ele('time').txt('0:0')
+  serverTime.ele('day-of-week').txt(new Date().toLocaleDateString('en-US', { weekday: 'short' }))
 
   const xml = root.end({ prettyPrint: true })
   res.setHeader('content-type', 'text/xml')
   res.send(xml)
 }
 
-server.app.get('/carsds/api/AccountLogoutRequest', async (req, res) => {
+server.app.get('/fairies/api/AccountLogoutRequest', async (req, res) => {
   req.session.destroy()
 
   const root = create().ele('AccountLogoutResponse')
@@ -122,11 +125,11 @@ server.app.get('/carsds/api/AccountLogoutRequest', async (req, res) => {
   res.send(xml)
 })
 
-server.app.get('/carsds/api/WhoAmIRequest', async (req, res) => {
+server.app.get('/fairies/api/WhoAmIRequest', async (req, res) => {
   await handleWhoAmIRequest(req, res)
 })
 
-server.app.post('/carsds/api/WhoAmIRequest', async (req, res) => {
+server.app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
   await handleWhoAmIRequest(req, res)
 })
 
@@ -190,15 +193,15 @@ server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/carsds/api/AccountLoginRequest', async (req, res) => {
+server.app.post('/fairies/api/AccountLoginRequest', async (req, res) => {
   await db.handleAccountLogin(req, res)
 })
 
-server.app.get('/carsds/api/AccountLoginRequest', async (req, res) => {
+server.app.get('/fairies/api/AccountLoginRequest', async (req, res) => {
   await db.handleAccountLogin(req, res)
 })
 
-server.app.get('/carsds/api/GameEntranceRequest', (req, res) => {
+server.app.get('/fairies/api/GameEntranceRequest', (req, res) => {
   const root = create().ele('GameEntranceRequestResponse')
   const item = root.ele('success')
   item.txt('true')
@@ -212,7 +215,7 @@ server.app.get('/carsds/api/GameEntranceRequest', (req, res) => {
   res.send(xml)
 })
 
-server.app.get('/carsds/api/QueueStatsRequest', (req, res) => {
+server.app.get('/fairies/api/QueueStatsRequest', (req, res) => {
   const root = create().ele('QueueStatsRequestResponse')
 
   const queue = root.ele('queue')
@@ -225,7 +228,7 @@ server.app.get('/carsds/api/QueueStatsRequest', (req, res) => {
   res.send(xml)
 })
 
-server.app.get('/carsds/api/GenerateTokenRequest', async (req, res) => {
+server.app.post('/fairies/api/GenerateTokenRequest', async (req, res) => {
   const root = create().ele('GenerateTokenRequestResponse')
 
   const ses = req.session
@@ -243,7 +246,8 @@ server.app.get('/carsds/api/GenerateTokenRequest', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/carsds/api/RedeemPromoCodeRequest', async (req, res) => {
+/*
+server.app.post('/fairies/api/RedeemPromoCodeRequest', async (req, res) => {
   const root = create().ele('RedeemPromoCodeRequestResponse')
   const ses = req.session
 
@@ -331,10 +335,11 @@ server.app.post('/carsds/api/RedeemPromoCodeRequest', async (req, res) => {
   res.setHeader('content-type', 'text/xml')
   res.send(xml)
 })
+*/
 
 server.app.use(express.json())
 
-server.app.post('/carsds/api/internal/setCarData', async (req, res) => {
+server.app.post('/fairies/api/internal/setFairyData', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -342,20 +347,22 @@ server.app.post('/carsds/api/internal/setCarData', async (req, res) => {
   const data = req.body
 
   if (data.playToken && data.fieldData) {
-    const car = await db.retrieveCarByOwnerAccount(data.playToken)
-    console.log(car, data.fieldData)
-    Object.assign(car, data.fieldData)
-    await car.save()
+    const fairy = await db.retrieveFairyByOwnerAccount(data.playToken)
+    console.log(fairy, data.fieldData)
+    Object.assign(fairy, data.fieldData)
+    await fairy.save()
     return res.status(200).send({ success: true, message: 'Success.' })
   }
 
   return res.status(501).send({ success: false, message: 'Something went wrong.' })
 })
 
-server.app.get('/carsds/api/internal/retrieveAccount', async (req, res) => {
+server.app.get('/fairies/api/internal/retrieveAccount', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
+
+  console.log(req.query)
 
   res.setHeader('content-type', 'application/json')
   if (req.query.userName) {
@@ -372,7 +379,7 @@ server.app.get('/carsds/api/internal/retrieveAccount', async (req, res) => {
   return res.status(404).send({ message: `Could not find account from username ${req.query.userName}` })
 })
 
-server.app.get('/carsds/api/internal/retrieveCar', async (req, res) => {
+server.app.get('/fairies/api/internal/retrieveFairy', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -380,14 +387,14 @@ server.app.get('/carsds/api/internal/retrieveCar', async (req, res) => {
   res.setHeader('content-type', 'application/json')
   if (req.query.identifier) {
     res.end(JSON.stringify(
-      await db.retrieveCar(req.query.identifier))
+      await db.retrieveFairy(req.query.identifier))
     )
     return
   }
 
   if (req.query.playToken) {
     res.end(JSON.stringify(
-      await db.retrieveCarByOwnerAccount(req.query.playToken))
+      await db.retrieveFairyByOwnerAccount(req.query.playToken))
     )
     return
   }
@@ -395,7 +402,7 @@ server.app.get('/carsds/api/internal/retrieveCar', async (req, res) => {
   return res.status(400).send({})
 })
 
-server.app.get('/carsds/api/internal/retrieveObject/:identifier', async (req, res) => {
+server.app.get('/fairies/api/internal/retrieveObject/:identifier', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -417,32 +424,19 @@ server.app.get('/carsds/api/internal/retrieveObject/:identifier', async (req, re
       ))
     }
 
-    // Check for Car
-    let car = await db.retrieveCar(req.params.identifier)
-    if (car) {
-      car = car.toObject()
+    // Check for Fairy
+    let fairy = await db.retrieveFairy(req.params.identifier)
+    if (fairy) {
+      fairy = fairy.toObject()
 
-      if (car._id === Number(req.params.identifier)) {
-        car.objectName = 'DistributedCarPlayer'
-      } else if (car.racecarId === Number(req.params.identifier)) {
-        car.objectName = 'DistributedRaceCar'
+      if (fairy._id === Number(req.params.identifier)) {
+        fairy.objectName = 'DistributedFairyPlayer'
       } else {
-        car.objectName = 'Unknown'
+        fairy.objectName = 'Unknown'
       }
 
       return res.end(JSON.stringify(
-        car
-      ))
-    }
-
-    // Check for CarPlayerStatus
-    let status = await db.retrieveCarPlayerStatus(req.params.identifier)
-    if (status) {
-      status = status.toObject()
-
-      status.objectName = 'CarPlayerStatus'
-      return res.end(JSON.stringify(
-        status
+        fairy
       ))
     }
 
@@ -450,7 +444,7 @@ server.app.get('/carsds/api/internal/retrieveObject/:identifier', async (req, re
   }
 })
 
-server.app.post('/carsds/api/internal/updateObject/:identifier', async (req, res) => {
+server.app.post('/fairies/api/internal/updateObject/:identifier', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -468,21 +462,12 @@ server.app.post('/carsds/api/internal/updateObject/:identifier', async (req, res
     }
 
     if (!updated) {
-      const car = await db.retrieveCar(req.params.identifier)
-      if (car) {
-        const carData = car.toObject().carData
-        Object.assign(carData, data)
-        car.carData = carData
-        await car.save()
-        updated = true
-      }
-    }
-
-    if (!updated) {
-      const status = await db.retrieveCarPlayerStatus(req.params.identifier)
-      if (status) {
-        Object.assign(status, data)
-        await status.save()
+      const fairy = await db.retrieveFairy(req.params.identifier)
+      if (fairy) {
+        const fairyData = fairy.toObject()
+        Object.assign(fairyData, data)
+        fairy = fairyData
+        await fairyData.save()
         updated = true
       }
     }
@@ -593,6 +578,105 @@ server.app.get('/dxd/flashAPI/getTermsOfUseText', async (req, res) => {
 
 server.app.get('/getShopItemData', async (req, res) => {
   return res.end(JSON.stringify(shopData))
+})
+
+server.app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
+  const root = create().ele('SubmitDNameRequestResponse')
+
+  const item = root.ele('success')
+  item.txt('true')
+
+  const xml = root.end({ prettyPrint: true })
+  res.send(xml)
+})
+
+server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
+  const root = create().ele('response')
+
+  const ses = req.session
+
+  const item = root.ele('success')
+  item.txt(ses ? 'true' : 'false')
+
+  fairies = root.ele('fairies')
+
+  const fairy = fairies.ele('fairy')
+
+  fairy.ele('chosen').txt(true)
+
+  const avatar = fairy.ele('avatar')
+
+  console.log(req.body)
+
+  if (req.body.current != '###') {
+    ses.fairyId = req.body.current
+  }
+
+  fairy.ele('fairy_id').txt(ses.fairyId)
+
+  const fairyData = await db.retrieveFairy(ses.fairyId)
+  console.log(fairyData)
+
+  root.ele('user_id').txt(ses.userId)
+
+  const xml = root.end({ prettyPrint: true })
+  res.send(xml)
+})
+
+server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
+  ;
+  const fairyData = req.body.fairiesnewfairyrequest.fairy[0]
+
+  const root = create().ele('response')
+
+  const ses = req.session
+
+  const item = root.ele('success')
+  item.txt(ses ? 'true' : 'false')
+
+  const fairy_id = ses ? await db.createFairy(ses.userId, fairyData) : -1
+  root.ele('fairy_id').txt(fairy_id)
+
+  const xml = root.end({ prettyPrint: true })
+  res.send(xml)
+})
+
+server.app.post('/fairies/api/ChooseFairyRequest', (req, res) => {
+  const root = create().ele('response')
+
+  const item = root.ele('success')
+  item.txt('true')
+
+  const xml = root.end({ prettyPrint: true })
+  res.send(xml)
+})
+
+server.app.post('/fairies/api/FairiesInventoryRequest', (req, res) => {
+  const root = create().ele('response')
+  root.ele('success').txt('true')
+
+  const inventory = root.ele('inventory')
+  inventory.ele('type').txt('wardrobe')
+
+  const items = [
+    { item_id: 2501, inv_id: 3612, slot: 0, created_by_id: 0, gifted_by_id: 0, quality: 3, color: { number: 1, value: 37 } },
+    { item_id: 2503, inv_id: 3876, slot: 1, created_by_id: 0, gifted_by_id: 0, quality: 3, color: { number: 1, value: 39 } },
+    { item_id: 2503, inv_id: 3877, slot: 2, created_by_id: 0, gifted_by_id: 0, quality: 3, color: { number: 1, value: 39 } }
+  ]
+
+  items.forEach(i => {
+    const inv = inventory.ele('inv_item')
+    inv.ele('item_id').txt(String(i.item_id))
+    inv.ele('inv_id').txt(String(i.inv_id))
+    inv.ele('slot').txt(String(i.slot))
+    inv.ele('created_by_id').txt(String(i.created_by_id))
+    inv.ele('gifted_by_id').txt(String(i.gifted_by_id))
+    inv.ele('quality').txt(String(i.quality))
+    inv.ele('color').att('number', String(i.color.number)).txt(String(i.color.value))
+  })
+
+  const xml = root.end({ prettyPrint: true })
+  res.send(xml)
 })
 
 // Remove userSession at the very end of the router stack, add routes above this call please.

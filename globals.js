@@ -246,17 +246,20 @@ server.app.use(express.urlencoded({ extended: true }))
 
 server.app.use(cors())
 
+const xmlparser = require('express-xml-bodyparser')
+server.app.use(xmlparser())
+
 server.app.set('trust proxy', 1)
 
 // Setup sessions and include our web routes.
 const session = require('express-session')
-const MongoStore = require('connect-mongo')
+const MongoStore = require('connect-mongo').default
 
 /* global sess: writeable */
 
 sess = {
-  secret: process.env.SESSION_SECRET || 'woc_secret',
-  store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/woc' }),
+  secret: process.env.SESSION_SECRET || 'PixieHollow_secret',
+  store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/PixieHollow' }),
   resave: false,
   saveUninitialized: true,
 

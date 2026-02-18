@@ -2,17 +2,50 @@
 
 mongoose = global.mongoose
 
-const Cars = new mongoose.model('Cars', {
+const Fairy = new mongoose.model('Fairy', {
   _id: { type: Number },
-  carData: { type: Object },
   ownerAccount: { type: String },
   accountId: { type: Number }, // Account object id
-  racecarId: { type: Number }, // DistributedRaceCar object id
-  friends: { type: Array }, // Friends list (of Account object ids)
-  membershipStart: { type: Date }, // Membership start date
-  yardPermissionMask: { type: Number }, // Yard permission mask
-  ruleStates: { type: Array },
-  badges: { type: Array }
+  name: String,
+  talent: Number,
+  gender: Number,
+  chosen: { type: Boolean, default: false },
+  icon: { type: Number, default: 0 },
+  game_prof_bg: { type: String, default: null },
+  bio: { type: String, default: '' },
+  avatar: {
+    proportions: {
+      head: Number,
+      height: Number,
+      body: Number
+    },
+    rotations: {
+      head_rot: Number,
+      ll_arm_rot: Number,
+      ul_arm_rot: Number,
+      ul_leg_rot: Number,
+      ll_leg_rot: Number,
+      lr_arm_rot: Number,
+      ur_arm_rot: Number,
+      lr_leg_rot: Number,
+      ur_leg_rot: Number
+    },
+    hair_back: Number,
+    hair_front: Number,
+    face: Number,
+    eye: Number,
+    wing: Number,
+    hair_color: Number,
+    eye_color: Number,
+    skin_color: Number,
+    wing_color: Number,
+    items: [{
+      type: { type: String },
+      item_id: Number,
+      color_number: Number,
+      color_value: Number
+    }]
+  }
 })
 
-module.exports = Cars
+module.exports = Fairy
