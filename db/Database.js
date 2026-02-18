@@ -9,10 +9,8 @@ libamf = global.libamf
 Racecar = global.Racecar
 
 const Account = require('./models/Account')
-const Cars = require('./models/Cars')
-const CarPlayerStatus = require('./models/CarPlayerStatus')
+const Cars = require('./models/Fairy')
 const RedeemableCodes = require('./models/RedeemableCodes')
-const RaceCodes = require('./models/RaceCodes')
 
 const bcrypt = require('bcrypt')
 
@@ -20,7 +18,7 @@ const axios = require('axios').default
 
 const saltRounds = 12
 
-const userAgent = 'Sunrise Games - World of Cars Online API'
+const userAgent = 'Sunrise Games - Pixie Hollow API'
 
 class Database {
   constructor () {
@@ -170,7 +168,7 @@ class Database {
   }
 
   async doesCarExist (identifier) {
-    const car = await Cars.findOne({ $or: [{ _id: identifier }, { accountId: identifier }, { racecarId: identifier }] })
+    const car = await Cars.findOne({ $or: [{ _id: identifier }, { accountId: identifier }] })
 
     if (car) {
       return true
@@ -180,7 +178,7 @@ class Database {
   }
 
   async retrieveCar (identifier) {
-    const car = await Cars.findOne({ $or: [{ _id: identifier }, { accountId: identifier }, { racecarId: identifier }] })
+    const car = await Cars.findOne({ $or: [{ _id: identifier }, { accountId: identifier }] })
 
     if (car) {
       return car
@@ -204,16 +202,6 @@ class Database {
 
     if (car) {
       return car.carData
-    }
-
-    return false
-  }
-
-  async retrieveCarPlayerStatus (identifier) {
-    const status = await CarPlayerStatus.findById(identifier)
-
-    if (status) {
-      return status
     }
 
     return false
@@ -269,7 +257,7 @@ class Database {
 
     data.append('username', username)
     data.append('password', password)
-    data.append('serverType', 'World of Cars Online')
+    data.append('serverType', 'Pixie Hollow')
 
     return await axios.post('https://sunrise.games/api/login/alt/', data, {
       headers: {
@@ -287,8 +275,8 @@ class Database {
     return await Account.findOne({ username })
   }
 
-  async retrieveAccountFromCarId (carId) {
-    return await Account.findOne({ $or: [{ playerId: carId }, { racecarId: carId }] })
+  async retrieveAccountFromCarId (fairyId) {
+    return await Account.findOne({ $or: [{ playerId: fairyId }] })
   }
 
   async verifyCredentials (username, password) {
@@ -339,29 +327,17 @@ class Database {
       _id: await this.getNextDoId(),
       carData: data,
       ownerAccount: await this.getUserNameFromAccountId(accountId),
-      accountId,
-      racecarId: await this.getNextDoId()
+      accountId
     })
 
     // AMF data
     car.carData.userId = accountId
     car.carData.playerId = car._id
-    car.carData.racecarId = car.racecarId
 
     const saved = await car.save()
 
-    // Create a new PlayerStatus for this car
-    const status = new CarPlayerStatus({
-      _id: await this.getNextDoId(),
-      ownerAccount: car.ownerAccount,
-      accountId
-    })
-    await status.save()
-
     // Save the information into the account.
     account.playerId = car._id
-    account.racecarId = car.racecarId
-    account.statusId = status._id
     await account.save()
 
     return saved.carData
@@ -407,26 +383,6 @@ class Database {
       account.codesRedeemed.push(code)
       await account.save()
     }
-  }
-
-  async retrieveRedeemableCode (code) {
-    const redeemableCode = await RedeemableCodes.findOne({ $and: [{ codeName: code }, { expirationDate: { $gt: new Date() } }] })
-
-    if (redeemableCode) {
-      return redeemableCode
-    }
-
-    return false
-  }
-
-  async retrieveRaceCode (code) {
-    const raceCode = await RaceCodes.findOne({ codeName: code })
-
-    if (raceCode) {
-      return raceCode
-    }
-
-    return false
   }
 }
 
