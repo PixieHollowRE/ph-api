@@ -89,6 +89,9 @@ server.app.use(express.urlencoded({ extended: true }))
 
 server.app.use(cors())
 
+var xmlparser = require('express-xml-bodyparser');
+server.app.use(xmlparser());
+
 server.app.set('trust proxy', 1)
 
 // Setup sessions and include our web routes.

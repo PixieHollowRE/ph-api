@@ -40,7 +40,7 @@ function handleWhoAmI(req, res) {
         status.txt('not_logged_in');
     }
 
-    account = root.ele('account', {'account_id': accountId})
+    account = root.ele('account', { 'account_id': accountId })
     account.ele('first_name');
     account.ele('dname').txt('test');
     account.ele('age').txt(0);
@@ -56,9 +56,9 @@ function handleWhoAmI(req, res) {
     serverTime = root.ele('server-time');
     serverTime.ele('day').txt(new Date().toLocaleDateString('en-ZA'));
     serverTime.ele('time').txt('0:0');
-    serverTime.ele('day-of-week').txt(new Date().toLocaleDateString('en-US', {weekday: 'short'}));
+    serverTime.ele('day-of-week').txt(new Date().toLocaleDateString('en-US', { weekday: 'short' }));
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 }
 
@@ -76,7 +76,7 @@ server.app.post('/dxd/flashAPI/checkUsernameAvailability', async (req, res) => {
     const root = create().ele('response');
     root.ele('success').txt(status);
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
 
@@ -90,12 +90,12 @@ server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
     const results = root.ele('results')
     results.ele('userId').txt(accountId);
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
 
 server.app.post('/fairies/api/AccountLoginRequest', async (req, res) => {
-   await db.handleAccountLogin(req, res);
+    await db.handleAccountLogin(req, res);
 })
 
 server.app.get('/fairies/api/AccountLoginRequest', async (req, res) => {
@@ -111,7 +111,7 @@ server.app.get('/fairies/api/GameEntranceRequest', (req, res) => {
     const canEnter = queue.ele('can_enter_game');
     canEnter.txt('true');
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
 
@@ -128,7 +128,7 @@ server.app.post('/fairies/api/GenerateTokenRequest', (req, res) => {
         token.txt(ses.username);
     }
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
 
@@ -138,7 +138,7 @@ server.app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
     const item = root.ele('success');
     item.txt('true');
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
 
@@ -171,11 +171,13 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
 
     root.ele('user_id').txt(ses.userId);
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
 
-server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {;
+server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
+    ;
+    console.log(req.body);
     const fairyData = req.body.fairiesnewfairyrequest.fairy[0];
 
     const root = create().ele('response');
@@ -188,7 +190,7 @@ server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {;
     const fairy_id = ses ? await db.createFairy(ses.userId, fairyData) : -1;
     root.ele('fairy_id').txt(fairy_id);
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
 
@@ -198,6 +200,34 @@ server.app.post('/fairies/api/ChooseFairyRequest', (req, res) => {
     const item = root.ele('success');
     item.txt('true');
 
-    const xml = root.end({prettyPrint: true});
+    const xml = root.end({ prettyPrint: true });
     res.send(xml);
 })
+
+server.app.post('/fairies/api/FairiesInventoryRequest', (req, res) => {
+    const root = create().ele('response');
+    root.ele('success').txt('true');
+
+    const inventory = root.ele('inventory');
+    inventory.ele('type').txt('wardrobe');
+
+    const items = [
+        { item_id: 2501, inv_id: 3612, slot: 0, created_by_id: 0, gifted_by_id: 0, quality: 3, color: { number: 1, value: 37 } },
+        { item_id: 2503, inv_id: 3876, slot: 1, created_by_id: 0, gifted_by_id: 0, quality: 3, color: { number: 1, value: 39 } },
+        { item_id: 2503, inv_id: 3877, slot: 2, created_by_id: 0, gifted_by_id: 0, quality: 3, color: { number: 1, value: 39 } },
+    ];
+
+    items.forEach(i => {
+        const inv = inventory.ele('inv_item');
+        inv.ele('item_id').txt(String(i.item_id));
+        inv.ele('inv_id').txt(String(i.inv_id));
+        inv.ele('slot').txt(String(i.slot));
+        inv.ele('created_by_id').txt(String(i.created_by_id));
+        inv.ele('gifted_by_id').txt(String(i.gifted_by_id));
+        inv.ele('quality').txt(String(i.quality));
+        inv.ele('color').att('number', String(i.color.number)).txt(String(i.color.value));
+    });
+
+    const xml = root.end({ prettyPrint: true });
+    res.send(xml);
+});
