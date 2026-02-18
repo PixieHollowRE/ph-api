@@ -1,74 +1,152 @@
-libamf = global.libamf;
-ArrayCollection = global.ArrayCollection;
+/* global libamf:writeable, ArrayCollection:writeable */
+/* global db, Racecar:writeable */
 
-Racecar = global.Racecar;
+libamf = global.libamf
+ArrayCollection = global.ArrayCollection
+
+Racecar = global.Racecar
 
 class RaceCarService extends libamf.Service {
-    constructor() {
-        super('racecar');
+  constructor () {
+    super('racecar')
+  }
+
+  async createRaceCar (carData) {
+    const car = new Racecar()
+
+    Object.entries(carData).forEach(([key, value]) => {
+      if (key in car) {
+        car[key] = value
+      }
+    })
+
+    // Some attribute types are wrong from DB, causing client errors.
+    // TODO: Better way of solving this?
+    // Example: TypeError: Error #1034: Type Coercion failed: cannot convert []@2e3c5de8161 to com.disney.net.amfObjects.ServerArray.
+
+    const decalSlots = new ArrayCollection(...car.decalSlots)
+    car.decalSlots = decalSlots
+
+    const trophyItemList = new ArrayCollection(...car.trophyItemList)
+    car.trophyItemList = trophyItemList
+
+    const animationList = new ArrayCollection(...car.animationList)
+    car.animationList = animationList
+
+    const addonItemList = new ArrayCollection(...car.addonItemList)
+    car.addonItemList = addonItemList
+
+    const sponsorList = new ArrayCollection(...car.sponsorList)
+    car.sponsorList = sponsorList
+
+    const danceSequenceList = new ArrayCollection(...car.danceSequenceList)
+    car.danceSequenceList = danceSequenceList
+
+    const customItemList = new ArrayCollection(...car.customItemList)
+    car.customItemList = customItemList
+
+    const stretches = new ArrayCollection(...car.stretches)
+    car.stretches = stretches
+
+    const consumableItemList = new ArrayCollection(...car.consumableItemList)
+    car.consumableItemList = consumableItemList
+
+    return libamf.serialize(car, libamf.ENCODING.AMF3)
+  }
+
+  async updateRacecar (carObj) {
+    const car = await db.retrieveCar(carObj.playerId)
+    console.log('updateRacecar: ', carObj.playerId, car)
+
+    if (car) {
+      car.carData = {
+        ...car.carData,
+        detailingId: carObj.detailingId,
+        addonItemList: carObj.carDna.onAddons.length > 0 ? [[carObj.carDna.onAddons[0].itemId, 0, 0, 0]] : []
+      }
+
+      await car.save()
     }
 
-    async updateRacecar(carObj) {
-        var car = await db.retrieveCar(carObj.playerId);
+    return carObj
+  }
 
-        if (car) {
-            var serialized = libamf.serialize(carObj, libamf.ENCODING.AMF3);
-            car.serializedData = serialized;
-            car.save();
-        }
+  async insertCustomItems (carObj) {
+    const car = await db.retrieveCar(carObj.playerId)
 
-        return carObj;
+    if (car) {
+      car.carData = carObj
+      await car.save()
     }
 
-    async insertCustomItems(carObj) {
-        var car = await db.retrieveCar(carObj.playerId);
+    return carObj
+  }
 
-        if (car) {
-            var serialized = libamf.serialize(carObj, libamf.ENCODING.AMF3);
-            car.serializedData = serialized;
-            car.save();
-        }
+  async getRacecarIdsByUserId (accountId) {
+    console.log(`getRacecarIdsByUserId: ${accountId}`)
 
-        return carObj;
+    const car = await db.retrieveCarData(accountId)
+    const carId = car.playerId
+
+    const resp = new ArrayCollection()
+
+    if (carId !== undefined) {
+      resp.push(carId)
     }
 
-    async getRacecarIdsByUserId(accountId) {
-        console.log('getRacecarIdsByUserId: ', accountId);
+    return resp
+  }
 
-        var serializedData = await db.retrieveCarData(accountId);
+  async getRacecarOnLogin (racecarId) {
+    console.log(`getRacecarOnLogin: ${racecarId}`)
 
-        var car = libamf.deserialize(serializedData, libamf.ENCODING.AMF3);
+    const dbCar = await db.retrieveCarData(racecarId)
 
-        var carId = car.playerId;
+    if (dbCar) {
+      const serialized = await this.createRaceCar(dbCar)
+      return libamf.deserialize(serialized, libamf.ENCODING.AMF3)
+    }
+  }
 
-        const resp = new ArrayCollection();
-        resp.push(carId);
-        return resp;
+  async getRacecars (identifier) {
+    const resp = new ArrayCollection()
+    resp.push(await this.getRacecarByUserId(identifier))
+    return resp
+  }
+
+  async getRacecarsByUserIds (userIds) {
+    const resp = new ArrayCollection()
+
+    for (const userId of userIds) {
+      resp.push(await this.getRacecarByUserId(userId))
     }
 
-    async getRacecarOnLogin(racecarId) {
-        console.log('getRacecarOnLogin: ', racecarId);
+    return resp
+  }
 
-        var dbCar = await db.retrieveCar(racecarId);
+  async getRacecarByUserId (identifier) {
+    console.log(`getRacecarByUserId: ${identifier}`)
 
-        if (dbCar) {
-            var car = libamf.deserialize(dbCar.serializedData, libamf.ENCODING.AMF3);
-            return car;
-        }
+    let carData
+
+    if (!await db.doesCarExist(identifier)) {
+      carData = await db.createCar(identifier)
+    } else {
+      carData = await db.retrieveCarData(identifier)
     }
 
-    async getRacecarByUserId(accountId) {
-        console.log('getRacecarByUserId: ', accountId);
+    const serialized = await this.createRaceCar(carData)
+    return libamf.deserialize(serialized, libamf.ENCODING.AMF3)
+  }
 
-        if (!await db.doesCarExist(accountId)) {
-            await db.createCar(accountId);
-        }
-
-        var serializedData = await db.retrieveCarData(accountId);
-
-        var car = libamf.deserialize(serializedData, libamf.ENCODING.AMF3);
-        return car;
+  async getRacecar (identifier) {
+    console.log(`getRacecar: ${identifier}`)
+    const car = await db.retrieveCarData(identifier)
+    if (car) {
+      const serialized = await this.createRaceCar(car)
+      return libamf.deserialize(serialized, libamf.ENCODING.AMF3)
     }
+  }
 }
 
-module.exports = RaceCarService;
+module.exports = RaceCarService

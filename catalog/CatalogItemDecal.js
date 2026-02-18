@@ -1,18 +1,18 @@
-const CatalogCarItem = require('./CatalogCarItem');
+const CatalogCarItem = require('./CatalogCarItem')
 
-ArrayCollection = global.ArrayCollection;
+/* global ArrayCollection: writeable */
+
+ArrayCollection = global.ArrayCollection
 
 class CatalogItemDecal extends CatalogCarItem {
-    constructor() {
-        super();
+  constructor (assetUrls, decalType) {
+    super()
 
-        this.type = 1;
+    this.type = decalType
 
-        this.assets = new ArrayCollection();
-        this.assets.push('car_t_chr_avt_stock_sideWindows.jpg');
-
-        this.slots = new ArrayCollection();
-    }
+    this.assets = new ArrayCollection(...assetUrls)
+    this.slots = new ArrayCollection()
+  }
 }
 
 module.exports = CatalogItemDecal

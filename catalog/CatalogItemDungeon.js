@@ -1,13 +1,6 @@
-const CatalogItemWorldZone = require('./CatalogItemWorldZone');
+const CatalogItemWorldZone = global.CatalogItemWorldZone
 
 class CatalogItemDungeon extends CatalogItemWorldZone {
-    constructor(itemId) {
-        super();
-
-        this.itemId = itemId;
-
-        this.scriptUrl = 'new_player_tutorial';
-    }
 }
 
 module.exports = CatalogItemDungeon

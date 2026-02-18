@@ -1,14 +1,15 @@
-const CatalogPlayerStoreItem = require('./CatalogPlayerStoreItem');
+/* global ArrayCollection: writeable */
 
-ArrayCollection = global.ArrayCollection;
+const CatalogPlayerStoreItem = require('./CatalogPlayerStoreItem')
+ArrayCollection = global.ArrayCollection
 
 class CatalogCarItem extends CatalogPlayerStoreItem {
-    constructor() {
-        super();
+  constructor () {
+    super()
 
-        this.tryOnRotation = 0;
-        this.tryOnEmoteIds = new ArrayCollection();
-    }
+    this.tryOnRotation = 0
+    this.tryOnEmoteIds = new ArrayCollection()
+  }
 }
 
 module.exports = CatalogCarItem

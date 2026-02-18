@@ -1,31 +1,27 @@
-const CatalogItem = require('./CatalogItem');
+const CatalogItem = global.CatalogItem
 
-Vector = global.libamf.Vector;
-ArrayCollection = global.ArrayCollection;
+/* global ArrayCollection: writeable */
 
-CatalogItemRaceTrack = global.CatalogItemRaceTrack;
-CatalogItemRaceLevel = global.CatalogItemRaceLevel;
+ArrayCollection = global.ArrayCollection
 
 class CatalogItemRaceSeries extends CatalogItem {
-    constructor(itemId) {
-        super();
+  constructor (itemId) {
+    super()
 
-        this.itemId = itemId;
+    this.itemId = itemId
 
-        console.log(itemId);
+    this.raceLevelIds = new ArrayCollection()
+    this.raceLevelIds.push(41000, 41001, 41002, 41003, 41004, 41005, 41006)
 
-        this.raceLevelIds = new ArrayCollection();
-        this.raceLevelIds.push(1);
+    this.proTrackItemId = 1
+    this.milestoneQuestId = 0
 
-        this.proTrackItemId = 1;
-        this.milestoneQuestId = 0;
+    this.sponsorChoosenRuleId = 0
+    this.titleUrl = 'car_g_rac_ttl_pistonCupCircuit.swf'
 
-        this.sponsorChoosenRuleId = 0;
-        this.titleUrl = '';
-
-        this.sponsorIds = new ArrayCollection();
-        this.sponsorIds.push(0);
-    }
+    this.sponsorIds = new ArrayCollection()
+    this.sponsorIds.push(0)
+  }
 }
 
 module.exports = CatalogItemRaceSeries

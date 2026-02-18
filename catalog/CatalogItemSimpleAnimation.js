@@ -1,12 +1,13 @@
-CatalogItemAnimation = global.CatalogItemAnimation;
+/* global CatalogItemAnimation: writeable */
+
+CatalogItemAnimation = global.CatalogItemAnimation
 
 class CatalogItemSimpleAnimation extends CatalogItemAnimation {
-    constructor() {
-        super();
+  constructor (saniName, fullName = '') {
+    super()
 
-        this.sani = 'car_a_chr_avt_sports_idlescan.sani';
-        this.itemId = 33275;
-    }
+    this.sani = fullName || `car_a_chr_avt_sports_${saniName || 'idlescan'}.sani`
+  }
 }
 
 module.exports = CatalogItemSimpleAnimation

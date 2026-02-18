@@ -1,26 +1,26 @@
-const CatalogItem = require('./CatalogItem');
+const CatalogItem = require('./CatalogItem')
 
-ArrayCollection = global.ArrayCollection;
+/* global ArrayCollection: writeable */
+
+ArrayCollection = global.ArrayCollection
 
 class CatalogItemRaceLevel extends CatalogItem {
-    constructor(itemId) {
-        super();
+  constructor (proTrackId, milestoneQuestId, sponsorChoosenRuleId, unlockedItemId, racingPoints, sponsorsIds) {
+    super()
 
-        this.itemId = itemId;
+    this.nameUrl = ''
+    this.victoryPapparazziSoundIds = new ArrayCollection()
 
-        this.nameUrl = '';
-        this.victoryPapparazziSoundIds = new ArrayCollection();
+    this.proTrackItemId = proTrackId
+    this.milestoneQuestId = milestoneQuestId
+    this.victoryFlashCount = 0
+    this.sponsorChoosenRuleId = sponsorChoosenRuleId
+    this.unlockedItemId = unlockedItemId
+    this.racingPointsMinimum = racingPoints
 
-        this.proTrackItemId = 1;
-        this.milestoneQuestId = 0;
-        this.victoryFlashCount = 0;
-        this.sponsorChoosenRuleId = 0;
-        this.unlockedItemId = 0;
-        this.racingPointsMinimum = 0;
-
-        this.sponsorIds = new ArrayCollection();
-        this.sponsorIds.push(1);
-    }
+    this.sponsorIds = new ArrayCollection()
+    this.sponsorIds.push(...sponsorsIds)
+  }
 }
 
 module.exports = CatalogItemRaceLevel
