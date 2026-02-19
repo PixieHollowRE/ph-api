@@ -604,9 +604,9 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
 
   console.log(req.body)
 
-  if (req.body.current != '###') {
-    ses.fairyId = req.body.current
-  }
+  // if (req.body.current != '###') {
+  // ses.fairyId = req.body.current
+  // }
 
   fairy.ele('fairy_id').txt(ses.fairyId)
 

@@ -131,7 +131,7 @@ class Database {
 
     const validCredentials = await this.verifyCredentials(username, password)
     const accountId = await this.getAccountIdFromUser(username)
-    const puppetId = await this.getPuppetFromAccountId(accountId)
+    const fairy = await this.retrieveFairy(accountId)
 
     if (validCredentials) {
       const ses = req.session
@@ -140,7 +140,7 @@ class Database {
       ses.status = 'logged_in_player'
       ses.logged = true
       ses.userId = accountId
-      ses.puppetId = puppetId
+      ses.fairyId = fairy._id
     }
 
     const root = create().ele('AccountLoginResponse')
@@ -194,16 +194,6 @@ class Database {
     return false
   }
 
-  async retrieveFairyData (identifier) {
-    const fairy = await this.retrieveFairy(identifier)
-
-    if (fairy) {
-      return fairy.fairyData
-    }
-
-    return false
-  }
-
   async getAccountIdFromUser (username) {
     const account = await this.retrieveAccountFromUser(username)
 
@@ -222,16 +212,6 @@ class Database {
     }
 
     return ''
-  }
-
-  async getPuppetFromAccountId (accountId) {
-    const account = await this.retrieveAccountFromIdentifier(accountId)
-
-    if (account) {
-      return account.puppet
-    }
-
-    return 0
   }
 
   async retrieveAccountData (username) {
@@ -377,8 +357,7 @@ class Database {
     const account = new Account({
       _id: await this.getNextDoId(),
       username,
-      password: bcrypt.hashSync(password, saltRounds),
-      puppet: 0
+      password: bcrypt.hashSync(password, saltRounds)
     })
 
     return await account.save()
