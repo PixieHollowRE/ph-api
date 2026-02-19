@@ -73,7 +73,7 @@ async function handleWhoAmIRequest (req, res) {
   const root = create().ele('WhoAmIResponse')
 
   const item = root.ele('success')
-  item.txt(true)
+  item.txt(success)
 
   const status = root.ele('status')
   const user = root.ele('username')
