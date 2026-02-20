@@ -610,7 +610,7 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
     fairyId = ses?.fairyId ?? null
   }
 
-  const fairyData = await db.retrieveFairy(ses.fairyId)
+  const fairyData = await db.retrieveFairy(fairyId)
   const fairiesToSend = fairyData ? [fairyData] : []
 
   const root = create().ele('response')
