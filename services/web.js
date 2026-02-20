@@ -603,11 +603,18 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
   const includeBio = 'bio' in req.body
 
   let fairyId = req.body.fairy_id ?? null
+  const userId = req.body.user_id ?? null
 
   if (fairyId !== null) {
     fairyId = parseInt(fairyId)
   } else {
     fairyId = ses?.fairyId ?? null
+  }
+
+  if (userId !== null) {
+    // Grab the fairyId from the account instead.
+    const account = await db.retrieveAccountFromIdentifier(userId)
+    fairyId = account.playerId
   }
 
   const fairyData = await db.retrieveFairy(fairyId)
