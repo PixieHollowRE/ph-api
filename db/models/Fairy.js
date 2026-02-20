@@ -9,7 +9,7 @@ const Fairy = new mongoose.model('Fairy', {
   name: String,
   talent: Number,
   gender: Number,
-  chosen: { type: Boolean, default: false },
+  chosen: { type: Boolean, default: true },
   icon: { type: Number, default: 0 },
   game_prof_bg: { type: String, default: null },
   bio: { type: String, default: '' },
