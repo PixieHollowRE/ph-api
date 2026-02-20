@@ -6,6 +6,7 @@ const Fairy = new mongoose.model('Fairy', {
   _id: { type: Number },
   ownerAccount: { type: String },
   accountId: { type: Number }, // Account object id
+  created: { type: Date, default: Date.now },
   name: String,
   talent: Number,
   gender: Number,
@@ -13,6 +14,7 @@ const Fairy = new mongoose.model('Fairy', {
   icon: { type: Number, default: 0 },
   game_prof_bg: { type: String, default: null },
   bio: { type: String, default: '' },
+  address: { type: String, default: '1234CatepillerCorral' },
   avatar: {
     proportions: {
       head: Number,
