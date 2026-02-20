@@ -696,6 +696,7 @@ server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
   item.txt(ses ? 'true' : 'false')
 
   const fairyId = ses ? await db.createFairy(ses.userId, fairyData) : -1
+  ses.fairyId = fairyId
   root.ele('fairy_id').txt(fairyId)
 
   const xml = root.end({ prettyPrint: true })
