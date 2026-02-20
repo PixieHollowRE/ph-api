@@ -621,8 +621,7 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
   const fairiesEl = root.ele('fairies')
 
   for (const fairy of fairiesToSend) {
-    const fairyEl = fairiesEl.ele('fairy')
-    fairyEl.ele('fairy_id').txt(String(fairy._id))
+    const fairyEl = fairiesEl.ele('fairy').att('fairy_id', String(fairy._id))
     fairyEl.ele('name').txt(fairy.name)
     fairyEl.ele('talent').txt(String(fairy.talent))
     fairyEl.ele('gender').txt(String(fairy.gender))
