@@ -596,10 +596,6 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
 
   // Prior to November 10, 2011, you could create up to three fairies or sparrow men.
   // After that date, you could only create one fairy per Disney account.
-  // There was a minimal amount of hairstyles that you could start with,
-  // but you could get more later as you collected ingredients.
-  // You could also choose one of these talents for your fairy or sparrow man:
-  // Tinker, Water, Garden, Light, and Animal.
   const ses = req.session
 
   const loggedInFairy = false
