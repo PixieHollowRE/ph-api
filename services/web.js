@@ -104,7 +104,7 @@ async function handleWhoAmIRequest (req, res) {
 
   root.ele('userTestAccessAllowed').txt('false')
 
-  serverTime = root.ele('server-time')
+  const serverTime = root.ele('server-time')
   serverTime.ele('day').txt(new Date().toLocaleDateString('en-ZA'))
   serverTime.ele('time').txt('0:0')
   serverTime.ele('day-of-week').txt(new Date().toLocaleDateString('en-US', { weekday: 'short' }))
