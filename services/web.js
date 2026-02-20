@@ -109,6 +109,10 @@ async function handleWhoAmIRequest (req, res) {
   serverTime.ele('time').txt('0:0')
   serverTime.ele('day-of-week').txt(new Date().toLocaleDateString('en-US', { weekday: 'short' }))
 
+  if (ses.fairyId) {
+    root.ele('fairy_id').txt(ses.fairyId)
+  }
+
   const xml = root.end({ prettyPrint: true })
   res.setHeader('content-type', 'text/xml')
   res.send(xml)
@@ -587,33 +591,97 @@ server.app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
 })
 
 server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
-  const root = create().ele('response')
+  // NOTE: Sunrise only supports one Fairy or Sparrow Man character per account.
+  // Sunrise is aiming for accuracy as close as possible, even if the client may allow it still.
 
+  // Prior to November 10, 2011, you could create up to three fairies or sparrow men.
+  // After that date, you could only create one fairy per Disney account.
+  // There was a minimal amount of hairstyles that you could start with,
+  // but you could get more later as you collected ingredients.
+  // You could also choose one of these talents for your fairy or sparrow man:
+  // Tinker, Water, Garden, Light, and Animal.
   const ses = req.session
 
-  const item = root.ele('success')
-  item.txt(ses ? 'true' : 'false')
+  const loggedInFairy = false
+  const includeAvatar = 'dna' in req.body
+  const includeBio = 'bio' in req.body
 
-  fairies = root.ele('fairies')
+  let fairyId = req.body.fairy_id ?? null
 
-  const fairy = fairies.ele('fairy')
-
-  fairy.ele('chosen').txt(true)
-
-  const avatar = fairy.ele('avatar')
-
-  console.log(req.body)
-
-  // if (req.body.current != '###') {
-  // ses.fairyId = req.body.current
-  // }
-
-  fairy.ele('fairy_id').txt(ses.fairyId)
+  if (fairyId !== null) {
+    fairyId = parseInt(fairyId)
+  } else {
+    fairyId = ses?.fairyId ?? null
+  }
 
   const fairyData = await db.retrieveFairy(ses.fairyId)
-  console.log(fairyData)
+  const fairiesToSend = fairyData ? [fairyData] : []
 
-  root.ele('user_id').txt(ses.userId)
+  const root = create().ele('response')
+  root.ele('success').txt('true')
+  root.ele('user_id').txt(String(ses.userId))
+  root.ele('status').txt(fairyId != null ? 'logged_in_fairy' : 'logged_in')
+
+  const fairiesEl = root.ele('fairies')
+
+  for (const fairy of fairiesToSend) {
+    const fairyEl = fairiesEl.ele('fairy')
+    fairyEl.ele('fairy_id').txt(String(fairy._id))
+    fairyEl.ele('name').txt(fairy.name)
+    fairyEl.ele('talent').txt(String(fairy.talent))
+    fairyEl.ele('gender').txt(String(fairy.gender))
+    fairyEl.ele('chosen').txt(String(fairy.chosen || false))
+    fairyEl.ele('icon').txt(String(fairy.icon || 0))
+    fairyEl.ele('game_prof_bg').txt(fairy.game_prof_bg || '')
+
+    if (loggedInFairy) {
+      fairyEl.ele('logged_in_fairy').txt('true')
+    }
+
+    if (includeBio) {
+      fairyEl.ele('bio').txt(fairy.bio || '')
+    }
+
+    if (includeAvatar && fairy.avatar) {
+      const avatarEl = fairyEl.ele('avatar')
+
+      if (fairy.avatar.proportions) {
+        for (const [type, value] of Object.entries(fairy.avatar.proportions)) {
+          if (value != null) {
+            avatarEl.ele('proportion').att('type', type.toUpperCase()).txt(String(value))
+          }
+        }
+      }
+
+      if (fairy.avatar.rotations) {
+        for (const [type, value] of Object.entries(fairy.avatar.rotations)) {
+          if (value != null) {
+            avatarEl.ele('rotation').att('type', type.toUpperCase()).txt(String(value))
+          }
+        }
+      }
+
+      const simpleFields = [
+        'hair_back', 'hair_front', 'face', 'eye', 'wing',
+        'hair_color', 'eye_color', 'skin_color', 'wing_color'
+      ]
+      for (const field of simpleFields) {
+        if (fairy.avatar[field] != null) {
+          avatarEl.ele(field).txt(String(fairy.avatar[field]))
+        }
+      }
+
+      avatarEl.ele('gender').txt(String(fairy.gender))
+
+      if (fairy.avatar.items) {
+        for (const item of fairy.avatar.items) {
+          const itemEl = avatarEl.ele('item').att('type', item.type)
+          itemEl.ele('item_id').txt(String(item.item_id))
+          itemEl.ele('color').att('number', String(item.color_number)).txt(String(item.color_value))
+        }
+      }
+    }
+  }
 
   const xml = root.end({ prettyPrint: true })
   res.send(xml)
@@ -630,8 +698,8 @@ server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
   const item = root.ele('success')
   item.txt(ses ? 'true' : 'false')
 
-  const fairy_id = ses ? await db.createFairy(ses.userId, fairyData) : -1
-  root.ele('fairy_id').txt(fairy_id)
+  const fairyId = ses ? await db.createFairy(ses.userId, fairyData) : -1
+  root.ele('fairy_id').txt(fairyId)
 
   const xml = root.end({ prettyPrint: true })
   res.send(xml)
