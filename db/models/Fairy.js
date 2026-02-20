@@ -6,6 +6,7 @@ const Fairy = new mongoose.model('Fairy', {
   _id: { type: Number },
   ownerAccount: { type: String },
   accountId: { type: Number }, // Account object id
+  friends: { type: Array }, // Friends list (of Account object ids)
   created: { type: Date, default: Date.now },
   name: String,
   talent: Number,
