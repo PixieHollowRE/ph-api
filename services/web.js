@@ -630,6 +630,8 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
   for (const fairy of fairiesToSend) {
     const fairyEl = fairiesEl.ele('fairy').att('fairy_id', String(fairy._id))
     fairyEl.ele('address').txt(fairy.address)
+    fairyEl.ele('tutorial').txt(String(fairy.tutorialBitmask[0]))
+    fairyEl.ele('tutorial_hi').txt(String(fairy.tutorialBitmask[1]))
     fairyEl.ele('created').txt(fairy.created.toISOString().split('T')[0])
     fairyEl.ele('name').txt(fairy.name)
     fairyEl.ele('talent').txt(String(fairy.talent))
