@@ -196,7 +196,7 @@ server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
   // Start our session if we do not already have one.
   // TODO: Should we redirect instead if they are already signed in?
   if (!req.session.logged) {
-    await db.createDefaultSession(req, username, accountId, true)
+    await db.createSession(req, username, accountId, true)
   }
 
   const xml = root.end({ prettyPrint: true })

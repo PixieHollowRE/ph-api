@@ -133,7 +133,7 @@ class Database {
     const accountId = await this.getAccountIdFromUser(username)
 
     if (validCredentials) {
-      await db.createDefaultSession(req, username, accountId, false)
+      await db.createSession(req, username, accountId, false)
     }
 
     const root = create().ele('AccountLoginResponse')
@@ -147,7 +147,7 @@ class Database {
     res.send(xml)
   }
 
-  async createDefaultSession (req, username, accountId, justRegistered) {
+  async createSession (req, username, accountId, justRegistered) {
     const ses = req.session
 
     ses.username = username
