@@ -15,7 +15,6 @@
     "@eslint/js": "^10.0.1",
     "axios": "^1.13.5",
     "bcrypt": "^6.0.0",
-    "bytearray-node": "https://github.com/pyrodash/bytearray-node.git",
     "connect-mongo": "^6.0.0",
     "cors": "^2.8.6",
     "crypto-js": "^4.2.0",
@@ -23,19 +22,12 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "express-xml-bodyparser": "^0.4.1",
-    "fast-xml-parser": "^5.3.6",
     "globals": "^17.3.0",
-    "libamf": "^1.4.2",
     "mongoose": "^9.2.1",
     "pm2": "^6.0.14",
-    "readline-sync": "^1.4.10",
     "xmlbuilder2": "^4.0.3"
   },
   "devDependencies": {
-    "eslint": "^10.0.0",
-    "eslint-config-standard": "^17.1.0",
-    "eslint-plugin-import": "^2.32.0",
-    "eslint-plugin-n": "^17.24.0",
-    "eslint-plugin-promise": "^7.2.1"
+    "eslint": "^10.0.1"
   }
 }

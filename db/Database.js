@@ -1,10 +1,9 @@
 /* global mongoose: writeable */
 /* global create: writeable */
-/* global libamf: writeable */
+/* global db: writeable */
 
 mongoose = global.mongoose
 create = global.create
-libamf = global.libamf
 
 const Account = require('./models/Account')
 const Fairy = require('./models/Fairy')

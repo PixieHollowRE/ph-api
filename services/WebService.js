@@ -1,17 +1,16 @@
-/* global server:writable, create:writable */
+/* global app:writable, create:writable */
 /* global db, account:writeable */
 
-server = global.server
+app = global.app
 create = global.create
 
 const express = require('express')
 
 const CryptoJS = require('crypto-js')
-const { shopData } = require('../constants')
 
 const loginQueue = []
 
-server.app.get('/', (req, res) => {
+app.get('/', (req, res) => {
   res.send('Pixie Hollow API service.')
 })
 
@@ -118,7 +117,7 @@ async function handleWhoAmIRequest (req, res) {
   res.send(xml)
 }
 
-server.app.get('/fairies/api/AccountLogoutRequest', async (req, res) => {
+app.get('/fairies/api/AccountLogoutRequest', async (req, res) => {
   req.session.destroy()
 
   const root = create().ele('AccountLogoutResponse')
@@ -129,23 +128,23 @@ server.app.get('/fairies/api/AccountLogoutRequest', async (req, res) => {
   res.send(xml)
 })
 
-server.app.get('/fairies/api/WhoAmIRequest', async (req, res) => {
+app.get('/fairies/api/WhoAmIRequest', async (req, res) => {
   await handleWhoAmIRequest(req, res)
 })
 
-server.app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
+app.post('/fairies/api/WhoAmIRequest', async (req, res) => {
   await handleWhoAmIRequest(req, res)
 })
 
-server.app.get('/dxd/flashAPI/login', async (req, res) => {
+app.get('/dxd/flashAPI/login', async (req, res) => {
   await db.handleFlashLogin(req, res)
 })
 
-server.app.post('/dxd/flashAPI/login', async (req, res) => {
+app.post('/dxd/flashAPI/login', async (req, res) => {
   await db.handleFlashLogin(req, res)
 })
 
-server.app.post('/dxd/flashAPI/checkUsernameAvailability', async (req, res) => {
+app.post('/dxd/flashAPI/checkUsernameAvailability', async (req, res) => {
   const username = req.body.username
   let status
 
@@ -182,7 +181,7 @@ server.app.post('/dxd/flashAPI/checkUsernameAvailability', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
+app.post('/dxd/flashAPI/createAccount', async (req, res) => {
   const username = req.body.username.toLowerCase()
   const status = await db.createAccount(username, req.body.password)
   const accountId = await db.getAccountIdFromUser(req.body.username)
@@ -204,15 +203,15 @@ server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/fairies/api/AccountLoginRequest', async (req, res) => {
+app.post('/fairies/api/AccountLoginRequest', async (req, res) => {
   await db.handleAccountLogin(req, res)
 })
 
-server.app.get('/fairies/api/AccountLoginRequest', async (req, res) => {
+app.get('/fairies/api/AccountLoginRequest', async (req, res) => {
   await db.handleAccountLogin(req, res)
 })
 
-server.app.get('/fairies/api/GameEntranceRequest', (req, res) => {
+app.get('/fairies/api/GameEntranceRequest', (req, res) => {
   const root = create().ele('GameEntranceRequestResponse')
   const item = root.ele('success')
   item.txt('true')
@@ -226,7 +225,7 @@ server.app.get('/fairies/api/GameEntranceRequest', (req, res) => {
   res.send(xml)
 })
 
-server.app.get('/fairies/api/QueueStatsRequest', (req, res) => {
+app.get('/fairies/api/QueueStatsRequest', (req, res) => {
   const root = create().ele('QueueStatsRequestResponse')
 
   const queue = root.ele('queue')
@@ -239,7 +238,7 @@ server.app.get('/fairies/api/QueueStatsRequest', (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/fairies/api/GenerateTokenRequest', async (req, res) => {
+app.post('/fairies/api/GenerateTokenRequest', async (req, res) => {
   const root = create().ele('GenerateTokenRequestResponse')
 
   const ses = req.session
@@ -258,7 +257,7 @@ server.app.post('/fairies/api/GenerateTokenRequest', async (req, res) => {
 })
 
 /*
-server.app.post('/fairies/api/RedeemPromoCodeRequest', async (req, res) => {
+app.post('/fairies/api/RedeemPromoCodeRequest', async (req, res) => {
   const root = create().ele('RedeemPromoCodeRequestResponse')
   const ses = req.session
 
@@ -348,9 +347,9 @@ server.app.post('/fairies/api/RedeemPromoCodeRequest', async (req, res) => {
 })
 */
 
-server.app.use(express.json())
+app.use(express.json())
 
-server.app.post('/fairies/api/internal/setFairyData', async (req, res) => {
+app.post('/fairies/api/internal/setFairyData', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -368,7 +367,7 @@ server.app.post('/fairies/api/internal/setFairyData', async (req, res) => {
   return res.status(501).send({ success: false, message: 'Something went wrong.' })
 })
 
-server.app.get('/fairies/api/internal/retrieveAccount', async (req, res) => {
+app.get('/fairies/api/internal/retrieveAccount', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -388,7 +387,7 @@ server.app.get('/fairies/api/internal/retrieveAccount', async (req, res) => {
   return res.status(404).send({ message: `Could not find account from username ${req.query.userName}` })
 })
 
-server.app.get('/fairies/api/internal/retrieveFairy', async (req, res) => {
+app.get('/fairies/api/internal/retrieveFairy', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -411,7 +410,7 @@ server.app.get('/fairies/api/internal/retrieveFairy', async (req, res) => {
   return res.status(400).send({})
 })
 
-server.app.get('/fairies/api/internal/retrieveObject/:identifier', async (req, res) => {
+app.get('/fairies/api/internal/retrieveObject/:identifier', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -453,7 +452,7 @@ server.app.get('/fairies/api/internal/retrieveObject/:identifier', async (req, r
   }
 })
 
-server.app.post('/fairies/api/internal/updateObject/:identifier', async (req, res) => {
+app.post('/fairies/api/internal/updateObject/:identifier', async (req, res) => {
   if (!verifyAuthorization(req.headers.authorization)) {
     return res.status(401).send('Authorization failed.')
   }
@@ -487,7 +486,7 @@ server.app.post('/fairies/api/internal/updateObject/:identifier', async (req, re
   }
 })
 
-server.app.post('/dxd/flashAPI/getFamilyStructure', (req, res) => {
+app.post('/dxd/flashAPI/getFamilyStructure', (req, res) => {
   // TODO: Implement parent accounts
   const root = create().ele('response')
   root.ele('success').txt(0)
@@ -497,7 +496,7 @@ server.app.post('/dxd/flashAPI/getFamilyStructure', (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/dxd/flashAPI/lookupAccount', async (req, res) => {
+app.post('/dxd/flashAPI/lookupAccount', async (req, res) => {
   const root = create().ele('response')
   const ses = req.session
 
@@ -548,7 +547,7 @@ server.app.post('/dxd/flashAPI/lookupAccount', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/commerce/flashapi/lookupOffers', async (req, res) => {
+app.post('/commerce/flashapi/lookupOffers', async (req, res) => {
   // TODO: Implement me
   const root = create().ele('response')
   root.ele('success').txt(1)
@@ -560,7 +559,7 @@ server.app.post('/commerce/flashapi/lookupOffers', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/commerce/flashapi/lookupSubscriptions', async (req, res) => {
+app.post('/commerce/flashapi/lookupSubscriptions', async (req, res) => {
   // TODO: Same as above
   const root = create().ele('response')
   root.ele('success').txt(1)
@@ -570,7 +569,7 @@ server.app.post('/commerce/flashapi/lookupSubscriptions', async (req, res) => {
   res.send(xml)
 })
 
-server.app.get('/dxd/flashAPI/getTermsOfUseText', async (req, res) => {
+app.get('/dxd/flashAPI/getTermsOfUseText', async (req, res) => {
   // TODO: Same as above
   const root = create().ele('response')
   root.ele('success').txt(1)
@@ -583,11 +582,7 @@ server.app.get('/dxd/flashAPI/getTermsOfUseText', async (req, res) => {
   res.send(xml)
 })
 
-server.app.get('/getShopItemData', async (req, res) => {
-  return res.end(JSON.stringify(shopData))
-})
-
-server.app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
+app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
   const root = create().ele('SubmitDNameRequestResponse')
 
   const item = root.ele('success')
@@ -597,7 +592,7 @@ server.app.post('/fairies/api/SubmitDNameRequest', (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
+app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
   // NOTE: Sunrise only supports one Fairy or Sparrow Man character per account.
   // Sunrise is aiming for accuracy as close as possible, even if the client may allow it still.
 
@@ -701,8 +696,7 @@ server.app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
-  ;
+app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
   const fairyData = req.body.fairiesnewfairyrequest.fairy[0]
 
   const root = create().ele('response')
@@ -720,7 +714,7 @@ server.app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/fairies/api/ChooseFairyRequest', (req, res) => {
+app.post('/fairies/api/ChooseFairyRequest', (req, res) => {
   const root = create().ele('response')
 
   const item = root.ele('success')
@@ -730,7 +724,7 @@ server.app.post('/fairies/api/ChooseFairyRequest', (req, res) => {
   res.send(xml)
 })
 
-server.app.post('/fairies/api/FairiesInventoryRequest', (req, res) => {
+app.post('/fairies/api/FairiesInventoryRequest', (req, res) => {
   const root = create().ele('response')
   root.ele('success').txt('true')
 
@@ -756,11 +750,4 @@ server.app.post('/fairies/api/FairiesInventoryRequest', (req, res) => {
 
   const xml = root.end({ prettyPrint: true })
   res.send(xml)
-})
-
-// Remove userSession at the very end of the router stack, add routes above this call please.
-server.app.use((req, res, next) => {
-  // eslint-disable-next-line no-undef
-  userSession = {}
-  next()
 })

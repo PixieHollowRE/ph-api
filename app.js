@@ -4,14 +4,10 @@ require('dotenv').config()
 // Include our globals.
 require('./globals')
 
-server = global.server
+app = global.app
 
-/* global server: writeable */
+/* global app: writeable */
 
-server.on('data', packet => {
-  console.log(packet)
-})
-
-server.listen(8013, () => {
+app.listen(8013, () => {
   console.log('Listening on port 8013')
 })
