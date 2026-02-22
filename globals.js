@@ -28,6 +28,7 @@ global.app.use(xmlparser())
 
 /* global sess: writeable */
 
+// Setup sessions and include our web routes.
 sess = {
   secret: process.env.SESSION_SECRET || 'PixieHollow_secret',
   store: MongoStore.create({ mongoUrl: 'mongodb://127.0.0.1:27017/PixieHollow' }),
