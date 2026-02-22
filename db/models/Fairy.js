@@ -16,7 +16,7 @@ const Fairy = new mongoose.model('Fairy', {
   game_prof_bg: { type: String, default: null },
   bio: { type: String, default: '' },
   address: { type: String, default: '1234CatepillerCorral' },
-  moreOptions: String,
+  moreOptions: { type: String, default: '000000000000000000000000' },
   tutorialBitmask: { type: Array, default: [0, 0] },
   avatar: {
     proportions: {

@@ -131,16 +131,9 @@ class Database {
 
     const validCredentials = await this.verifyCredentials(username, password)
     const accountId = await this.getAccountIdFromUser(username)
-    const fairy = await this.retrieveFairy(accountId)
 
     if (validCredentials) {
-      const ses = req.session
-      ses.username = username
-      ses.success = '1'
-      ses.status = 'logged_in_player'
-      ses.logged = true
-      ses.userId = accountId
-      ses.fairyId = fairy._id
+      await db.createDefaultSession(req, username, accountId, false)
     }
 
     const root = create().ele('AccountLoginResponse')
@@ -152,6 +145,21 @@ class Database {
     const xml = root.end({ prettyPrint: true })
     res.setHeader('content-type', 'text/xml')
     res.send(xml)
+  }
+
+  async createDefaultSession (req, username, accountId, justRegistered) {
+    const ses = req.session
+
+    ses.username = username
+    ses.success = '1'
+    ses.status = 'logged_in_player'
+    ses.logged = true
+    ses.userId = accountId
+
+    if (!justRegistered) {
+      const fairy = await this.retrieveFairy(accountId)
+      ses.fairyId = fairy._id
+    }
   }
 
   async isUsernameAvailable (username) {

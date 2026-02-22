@@ -183,7 +183,8 @@ server.app.post('/dxd/flashAPI/checkUsernameAvailability', async (req, res) => {
 })
 
 server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
-  const status = await db.createAccount(req.body.username.toLowerCase(), req.body.password)
+  const username = req.body.username.toLowerCase()
+  const status = await db.createAccount(username, req.body.password)
   const accountId = await db.getAccountIdFromUser(req.body.username)
 
   const root = create().ele('response')
@@ -191,6 +192,12 @@ server.app.post('/dxd/flashAPI/createAccount', async (req, res) => {
 
   const results = root.ele('results')
   results.ele('userId').txt(accountId)
+
+  // Start our session if we do not already have one.
+  // TODO: Should we redirect instead if they are already signed in?
+  if (!req.session.logged) {
+    await db.createDefaultSession(req, username, accountId, true)
+  }
 
   const xml = root.end({ prettyPrint: true })
   res.setHeader('content-type', 'text/xml')
