@@ -684,7 +684,7 @@ app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
 
       if (fairy.avatar.items) {
         for (const item of fairy.avatar.items) {
-          const itemEl = avatarEl.ele('item').att('type', item.type)
+          const itemEl = avatarEl.ele('inv_item').att('type', item.type)
           itemEl.ele('item_id').txt(String(item.item_id))
           itemEl.ele('color').att('number', String(item.color_number)).txt(String(item.color_value))
         }
