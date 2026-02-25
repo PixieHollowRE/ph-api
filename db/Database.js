@@ -1,9 +1,9 @@
 /* global mongoose: writeable */
-/* global create: writeable */
 /* global db: writeable */
 
 mongoose = global.mongoose
-create = global.create
+
+const createXML = require('../utils/xml')
 
 const Account = require('./models/Account')
 const Fairy = require('./models/Fairy')
@@ -82,37 +82,38 @@ class Database {
       validCredentials = await this.verifyCredentials(username, password)
       accountId = await this.getAccountIdFromUser(username)
     }
-    let errorResp = ''
 
-    const root = create().ele('result')
-
-    const success = root.ele('success')
-    success.txt(validCredentials)
-
-    const err = root.ele('error')
-
-    if (!validCredentials) {
-      errorResp = 'PARAM_ERROR'
+    const responseData = {
+      success: validCredentials,
+      error: ''
     }
 
-    err.txt(errorResp)
+    if (!validCredentials) {
+      responseData.error = {
+        '@code': 'PARAM_ERROR'
+      }
 
-    const input = root.ele('input')
-    input.ele('cookieValue')
+      return res.send(createXML({
+        result: responseData
+      }))
+    }
 
-    input.ele('loginType').txt('hard')
+    responseData.input = {
+      'cookieValue' : '',
+      'loginType': 'hard'
+    }
+    responseData.token = ''
+    responseData.type = 'hard'
+    responseData.banURL = ''
+    responseData.results = {
+      username,
+      userId: accountId
+    }
 
-    root.ele('token')
-    root.ele('type').txt('hard')
-    root.ele('banURL')
-
-    const results = root.ele('results')
-    results.ele('username').txt(username)
-    results.ele('userId').txt(accountId)
-
-    const xml = root.end({ prettyPrint: true })
     res.setHeader('content-type', 'text/xml')
-    res.send(xml)
+    res.send(createXML({
+      result: responseData
+    }))
   }
 
   async handleAccountLogin (req, res) {
@@ -131,19 +132,28 @@ class Database {
     const validCredentials = await this.verifyCredentials(username, password)
     const accountId = await this.getAccountIdFromUser(username)
 
+    let errorCode = '' // LOGIN_FAILED or BANNED
+
     if (validCredentials) {
       await db.createSession(req, username, accountId, false)
+    } else {
+      errorCode = 'LOGIN_FAILED'
     }
 
-    const root = create().ele('AccountLoginResponse')
-    const success = root.ele('success')
-    success.txt(validCredentials)
-
-    root.ele('account', { account_id: accountId })
-
-    const xml = root.end({ prettyPrint: true })
     res.setHeader('content-type', 'text/xml')
-    res.send(xml)
+    res.send(createXML({
+      AccountLoginResponse: {
+        success: validCredentials,
+        error: {
+          '@code': errorCode
+        },
+        account: {
+          '@account_id': accountId
+        },
+        dname_submitted: true,
+        dname_approved: true
+      }
+    }))
   }
 
   async createSession (req, username, accountId, justRegistered) {
