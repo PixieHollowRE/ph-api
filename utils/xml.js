@@ -1,3 +1,5 @@
+/* global create: writeable */
+
 create = global.create
 
 function createXML (data) {

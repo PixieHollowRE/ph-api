@@ -1,5 +1,5 @@
 /* global app:writable */
-/* global db, account:writeable */
+/* global db:writeable */
 
 app = global.app
 
@@ -62,7 +62,7 @@ async function handleWhoAmIRequest (req, res) {
   const ses = req.session
 
   let success = false
-  let status = ''
+  let status = 'not_logged_in'
   let accountId = -1
   let userName = ''
   let speedChatPrompt = 'false'
@@ -79,8 +79,6 @@ async function handleWhoAmIRequest (req, res) {
 
     const accData = await db.retrieveAccountData(userName)
     speedChatPrompt = `${Boolean(!accData.SpeedChatPlus)}`
-  } else {
-    status = 'not_logged_in'
   }
 
   res.setHeader('content-type', 'text/xml')
@@ -416,7 +414,7 @@ app.post('/dxd/flashAPI/lookupAccount', async (req, res) => {
 
     if (account) {
       responseData.acceptedTOU = true
-      
+
       const accData = await db.retrieveAccountData(account.username)
 
       responseData.results = {
