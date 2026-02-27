@@ -633,13 +633,13 @@ app.post('/fairies/api/FairiesNewFairyRequest', async (req, res) => {
 
   const fairyData = req.body.fairiesnewfairyrequest?.fairy[0]
 
-  const fairyId = ses ? await db.createFairy(100000002, fairyData) : -1
+  const fairyId = ses ? await db.createFairy(ses.userId, fairyData) : -1
   ses.fairyId = fairyId
 
   res.send(createXML({
     response: {
       success,
-      fairyId
+      fairy_id: fairyId
     }
   }))
 })
