@@ -551,7 +551,8 @@ app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
         gender: fairy.gender,
         chosen: fairy.chosen,
         icon: fairy.icon,
-        game_prof_bg: fairy.game_prof_bg
+        game_prof_bg: fairy.game_prof_bg,
+        options_mask: fairy.optionsBitmask
       }
     }
 

@@ -18,6 +18,7 @@ const Fairy = new mongoose.model('Fairy', {
   address: { type: String, default: '1234CatepillerCorral' },
   moreOptions: { type: String, default: '000000000000000000000000' },
   tutorialBitmask: { type: Array, default: [0, 0] },
+  optionsBitmask: {type: Number, default: 0},
   avatar: {
     proportions: {
       head: Number,
