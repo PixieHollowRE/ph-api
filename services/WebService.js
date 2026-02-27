@@ -560,7 +560,7 @@ app.post('/fairies/api/FairiesProfileRequest', async (req, res) => {
     }
 
     if (includeBio) {
-      fairyEl.fairy.bio = fairy.bio || ''
+      fairyEl['#'].bio = fairy.bio || ''
     }
 
     if (includeAvatar && fairy.avatar) {
